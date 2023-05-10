@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>MCv2_mod</title>
+</head>
+<body>
+	<h1>MCv2</h1>
+	<p>Enter your data:</p>
+	<table>
+		<tr>
+			<td>x:</td>
+			<td><textarea id="x-input" rows="10" cols="10"></textarea></td>
+			<td>dx:</td>
+			<td><textarea id="dx-input" rows="10" cols="10"></textarea></td>
+		</tr>
+		<tr>
+			<td>y:</td>
+			<td><textarea id="y-input" rows="10" cols="10"></textarea></td>
+			<td>dy:</td>
+			<td><textarea id="dy-input" rows="10" cols="10"></textarea></td>
+		</tr>
+	</table>
+	<button onclick="generateAll()">Generate</button>
+	<p id="output"></p>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jstat/1.7.1/jstat.min.js"></script>
+	<script>
+			let slopearray = [];
+			let interceptarray = [];
+
+		function generate(n) {
+			let x_input = document.getElementById("x-input").value;
+			let dx_input = document.getElementById("dx-input").value;
+			let y_input = document.getElementById("y-input").value;
+			let dy_input = document.getElementById("dy-input").value;
+
+			let x_array = x_input.split("\n").map(Number);
+			let dx_array = dx_input.split("\n").map(Number);
+			let y_array = y_input.split("\n").map(Number);
+			let dy_array = dy_input.split("\n").map(Number);
+
+			let x_new_array = [];
+			let y_new_array = [];
+
+			for (let i = 0; i < x_array.length; i++) {
+				let x_new = jStat.normal.inv(Math.random(), x_array[i], dx_array[i]);
+				let y_new = jStat.normal.inv(Math.random(), y_array[i], dy_array[i]);
+
+				x_new_array.push(x_new);
+				y_new_array.push(y_new);
+			}
+
+			// let output = "<table><tr><th>x-new</th><th>y-new</th></tr>";
+			// for (let i = 0; i < x_new_array.length; i++) {
+			// 	output += "<tr><td>" + x_new_array[i].toFixed(2) + "</td><td>" + y_new_array[i].toFixed(2) + "</td></tr>";
+			// }
+			// output += "</table>";
+
+			// document.getElementById("output").innerHTML = output;
+
+			// Calculate best-fit line slope and intercept
+			let x_mean = jStat.mean(x_new_array);
+			let y_mean = jStat.mean(y_new_array);
+
+			let numerator = 0;
+			let denominator = 0;
+
+			for (let i = 0; i < x_new_array.length; i++) {
+				numerator += (x_new_array[i] - x_mean) * (y_new_array[i] - y_mean);
+				denominator += (x_new_array[i] - x_mean) ** 2;
+			}
+
+			let slope = numerator / denominator;
+			let intercept = y_mean - slope * x_mean;
+
+			// output += "<p>Best-fit line: y = " + slope.toFixed(2) + "x + " + intercept.toFixed(2) + "</p>";
+			
+			slopearray[n]=slope;			
+			interceptarray[n]=intercept;
+
+			if(n==499){
+					let slopedev = jStat.stdev(slopearray);
+					let interceptdev = jStat.stdev(interceptarray);
+					output += "<p> Slope Standard Deviation " + slopedev.toFixed(6) + "</p>";
+					output += "<p> Intercept Standard Deviation " + interceptdev.toFixed(6) + "</p>";
+					return output;
+			}
+ 	
+			
+		}
+
+		function generateAll() {
+			let res = [];
+			for (let i=0;i<500;i++) {
+				res.push(generate(i));
+			}
+
+
+			document.getElementById("output").innerHTML = res;
+	
+		}
+	
+
+
+	</script>
+</body>
+</html>
